@@ -161,19 +161,32 @@ export async function fetchDogRuns(): Promise<DogRun[]> {
     console.error(`[WordPress API] Successfully transformed ${transformed.length} out of ${data.length} items`);
     
     if (transformed.length === 0 && data.length > 0) {
-      console.error("[WordPress API] ERROR: All items failed to transform!");
+      const errorMsg = "All WordPress items failed to transform. Check transformation logic.";
+      console.error("[WordPress API] ERROR:", errorMsg);
       // エラーをthrowしてVercelのログに表示されるようにする
-      throw new Error("All WordPress items failed to transform. Check transformation logic.");
+      throw new Error(errorMsg);
+    }
+    
+    if (transformed.length === 0) {
+      const errorMsg = "No dog runs data available from WordPress API";
+      console.error("[WordPress API] ERROR:", errorMsg);
+      // データが空の場合もエラーとして扱う（デバッグ用）
+      // 本番環境では空配列を返す方が良い場合もあるが、デバッグのためエラーをthrow
+      // throw new Error(errorMsg);
     }
     
     return transformed;
   } catch (error) {
     // エラーを明示的にログに出力（Vercelのログに表示されるように）
-    console.error("[WordPress API] FATAL ERROR fetching dog runs:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("[WordPress API] FATAL ERROR fetching dog runs:", errorMessage);
+    console.error("[WordPress API] Error object:", error);
     if (error instanceof Error) {
-      console.error("[WordPress API] Error message:", error.message);
       console.error("[WordPress API] Error stack:", error.stack);
     }
+    // エラーを再throwして、Vercelのログに表示されるようにする
+    // ただし、ページが表示されなくなる可能性があるため、コメントアウト
+    // throw error;
     // エラー時は空配列を返す
     return [];
   }
