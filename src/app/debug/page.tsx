@@ -9,7 +9,26 @@ export default async function DebugPage() {
     
     const status = response.status;
     const statusText = response.statusText;
-    const data = await response.json();
+    const contentType = response.headers.get("content-type");
+    
+    // レスポンスのテキストを先に取得
+    const responseText = await response.text();
+    
+    // Content-Typeを確認
+    let data;
+    let parseError = null;
+    
+    if (contentType && contentType.includes("application/json")) {
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        parseError = e instanceof Error ? e.message : String(e);
+        data = null;
+      }
+    } else {
+      parseError = `Expected JSON but got: ${contentType}`;
+      data = null;
+    }
     
     return (
       <div style={{ padding: "20px", fontFamily: "monospace" }}>
@@ -23,21 +42,41 @@ export default async function DebugPage() {
           <p>{status} {statusText}</p>
         </div>
         <div style={{ marginBottom: "20px" }}>
-          <h2>Data Count:</h2>
-          <p>{Array.isArray(data) ? data.length : "Not an array"}</p>
+          <h2>Content-Type:</h2>
+          <p>{contentType || "Not set"}</p>
         </div>
+        {parseError && (
+          <div style={{ marginBottom: "20px", background: "#ffebee", padding: "10px" }}>
+            <h2 style={{ color: "red" }}>Parse Error:</h2>
+            <p>{parseError}</p>
+          </div>
+        )}
         <div style={{ marginBottom: "20px" }}>
-          <h2>First Item:</h2>
+          <h2>Raw Response (first 500 chars):</h2>
           <pre style={{ background: "#f5f5f5", padding: "10px", overflow: "auto" }}>
-            {JSON.stringify(data[0] || {}, null, 2)}
+            {responseText.substring(0, 500)}
           </pre>
         </div>
         <div style={{ marginBottom: "20px" }}>
-          <h2>All Data:</h2>
-          <pre style={{ background: "#f5f5f5", padding: "10px", overflow: "auto", maxHeight: "500px" }}>
-            {JSON.stringify(data, null, 2)}
-          </pre>
+          <h2>Data Count:</h2>
+          <p>{data && Array.isArray(data) ? data.length : data ? "Not an array" : "No data"}</p>
         </div>
+        {data && Array.isArray(data) && data.length > 0 && (
+          <>
+            <div style={{ marginBottom: "20px" }}>
+              <h2>First Item:</h2>
+              <pre style={{ background: "#f5f5f5", padding: "10px", overflow: "auto" }}>
+                {JSON.stringify(data[0] || {}, null, 2)}
+              </pre>
+            </div>
+            <div style={{ marginBottom: "20px" }}>
+              <h2>All Data:</h2>
+              <pre style={{ background: "#f5f5f5", padding: "10px", overflow: "auto", maxHeight: "500px" }}>
+                {JSON.stringify(data, null, 2)}
+              </pre>
+            </div>
+          </>
+        )}
       </div>
     );
   } catch (error) {

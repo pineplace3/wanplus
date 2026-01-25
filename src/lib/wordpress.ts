@@ -118,13 +118,25 @@ export async function fetchDogRuns(): Promise<DogRun[]> {
     });
 
     console.error("[WordPress API] Response status:", response.status, response.statusText);
+    
+    // Content-Typeを確認
+    const contentType = response.headers.get("content-type");
+    console.error("[WordPress API] Content-Type:", contentType);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("[WordPress API] Error response:", errorText);
-      const error = new Error(`WordPress API error: ${response.status} - ${errorText}`);
+      console.error("[WordPress API] Error response:", errorText.substring(0, 500));
+      const error = new Error(`WordPress API error: ${response.status} - ${errorText.substring(0, 200)}`);
       console.error("[WordPress API] Throwing error:", error.message);
       throw error;
+    }
+
+    // Content-TypeがJSONでない場合のエラーハンドリング
+    if (!contentType || !contentType.includes("application/json")) {
+      const responseText = await response.text();
+      console.error("[WordPress API] Expected JSON but got:", contentType);
+      console.error("[WordPress API] Response preview:", responseText.substring(0, 500));
+      throw new Error(`WordPress API returned ${contentType || "unknown content type"} instead of JSON. Response preview: ${responseText.substring(0, 200)}`);
     }
 
     const data: WordPressDogRunResponse[] = await response.json();
