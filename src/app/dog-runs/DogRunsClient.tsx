@@ -35,7 +35,7 @@ export default function DogRunsClient({ initialData }: DogRunsClientProps) {
   }, [prefecture, initialData]);
 
   const filtered = useMemo(() => {
-    return initialData.filter((d) => {
+    const result = initialData.filter((d) => {
       const matchPref =
         prefecture === "すべて" || d.address.prefecture === prefecture;
       const matchCity = city === "すべて" || d.address.city === city;
@@ -48,6 +48,24 @@ export default function DogRunsClient({ initialData }: DogRunsClientProps) {
           .includes(keyword.toLowerCase());
       return matchPref && matchCity && matchGround && matchZone && matchKeyword;
     });
+    
+    // デバッグ用ログ（開発環境のみ）
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Filtered results:', {
+        total: initialData.length,
+        filtered: result.length,
+        filters: { prefecture, city, ground, zone, keyword },
+        sampleData: initialData[0] ? {
+          name: initialData[0].name,
+          zone: initialData[0].zone,
+          ground: initialData[0].ground,
+          prefecture: initialData[0].address.prefecture,
+          city: initialData[0].address.city,
+        } : null,
+      });
+    }
+    
+    return result;
   }, [prefecture, city, ground, zone, keyword, initialData]);
 
   return (
@@ -82,9 +100,16 @@ export default function DogRunsClient({ initialData }: DogRunsClientProps) {
       </section>
 
       <section className="space-y-4">
-        <p className="text-sm text-gray-600">
-          {filtered.length} 件ヒット（{prefecture} / {city}）
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-600">
+            {filtered.length} 件ヒット（{prefecture} / {city}）
+          </p>
+          {process.env.NODE_ENV === 'development' && (
+            <p className="text-xs text-gray-400">
+              全データ: {initialData.length}件
+            </p>
+          )}
+        </div>
         <div className="grid gap-6 sm:grid-cols-2">
           {filtered.map((item) => (
             <Link

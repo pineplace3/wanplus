@@ -53,10 +53,16 @@ function parseMannersWear(value?: string): boolean | "不明" {
 }
 
 // 配列または文字列を文字列に変換（zone用）
+// 配列の場合は、複数の値が含まれている可能性があるため、
+// フィルター処理で使用しやすいように最初の要素を返す
 function parseZone(value?: string | string[]): string {
   if (!value) return "共用のみ";
   if (Array.isArray(value)) {
-    // 配列の場合は最初の要素を使用、または複数の場合は結合
+    // 配列の場合は最初の要素を使用
+    // ただし、"共用のみ"が含まれている場合はそれを優先
+    if (value.includes("共用のみ")) {
+      return "共用のみ";
+    }
     return value[0] || "共用のみ";
   }
   return value;
