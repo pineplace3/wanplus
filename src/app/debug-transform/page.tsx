@@ -2,60 +2,61 @@
 import { fetchDogRuns, transformWordPressResponse } from "@/lib/wordpress";
 
 export default async function DebugTransformPage() {
-  let dogRuns: any[] = [];
-  let fetchError: string | null = null;
-  
-  // 生のAPIレスポンスも取得して比較
-  const apiUrl = "https://wanplus-admin.com/wp-json/wp/v2/dog_run?per_page=100";
-  let rawData = null;
-  let rawError = null;
-  
   try {
-    const rawResponse = await fetch(apiUrl, {
-      next: { revalidate: 0 },
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (compatible; WanPlus/1.0; +https://wanplus.vercel.app)',
-        'Referer': 'https://wanplus.vercel.app',
-      },
-    });
+    let dogRuns: any[] = [];
+    let fetchError: string | null = null;
     
-    if (rawResponse.ok) {
-      rawData = await rawResponse.json();
-    } else {
-      rawError = `Status: ${rawResponse.status} ${rawResponse.statusText}`;
+    // 生のAPIレスポンスも取得して比較
+    const apiUrl = "https://wanplus-admin.com/wp-json/wp/v2/dog_run?per_page=100";
+    let rawData = null;
+    let rawError = null;
+    
+    try {
+      const rawResponse = await fetch(apiUrl, {
+        next: { revalidate: 0 },
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (compatible; WanPlus/1.0; +https://wanplus.vercel.app)',
+          'Referer': 'https://wanplus.vercel.app',
+        },
+      });
+      
+      if (rawResponse.ok) {
+        rawData = await rawResponse.json();
+      } else {
+        rawError = `Status: ${rawResponse.status} ${rawResponse.statusText}`;
+      }
+    } catch (e) {
+      rawError = e instanceof Error ? e.message : String(e);
     }
-  } catch (e) {
-    rawError = e instanceof Error ? e.message : String(e);
-  }
-  
-  // fetchDogRunsを呼び出し
-  try {
-    console.error("[DebugTransform] Starting fetchDogRuns...");
-    dogRuns = await fetchDogRuns();
-    console.error(`[DebugTransform] Received ${dogRuns.length} dog runs`);
-  } catch (error) {
-    fetchError = error instanceof Error ? error.message : String(error);
-    console.error("[DebugTransform] Error fetching:", fetchError);
-  }
-  
-  // 生のAPIレスポンスで直接変換処理をテスト
-  let directTransformResults: any[] = [];
-  let directTransformErrors: Array<{ index: number; error: string }> = [];
-  
-  if (rawData && Array.isArray(rawData) && rawData.length > 0) {
-    for (let i = 0; i < rawData.length; i++) {
-      try {
-        // @ts-ignore - テスト用なので型チェックを無視
-        const transformed = transformWordPressResponse(rawData[i]);
-        directTransformResults.push(transformed);
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : String(error);
-        directTransformErrors.push({ index: i, error: errorMsg });
+    
+    // fetchDogRunsを呼び出し
+    try {
+      console.error("[DebugTransform] Starting fetchDogRuns...");
+      dogRuns = await fetchDogRuns();
+      console.error(`[DebugTransform] Received ${dogRuns.length} dog runs`);
+    } catch (error) {
+      fetchError = error instanceof Error ? error.message : String(error);
+      console.error("[DebugTransform] Error fetching:", fetchError);
+    }
+    
+    // 生のAPIレスポンスで直接変換処理をテスト
+    let directTransformResults: any[] = [];
+    let directTransformErrors: Array<{ index: number; error: string }> = [];
+    
+    if (rawData && Array.isArray(rawData) && rawData.length > 0) {
+      for (let i = 0; i < rawData.length; i++) {
+        try {
+          // @ts-ignore - テスト用なので型チェックを無視
+          const transformed = transformWordPressResponse(rawData[i]);
+          directTransformResults.push(transformed);
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : String(error);
+          directTransformErrors.push({ index: i, error: errorMsg });
+        }
       }
     }
-  }
-    
+      
     return (
       <div style={{ padding: "20px", fontFamily: "monospace" }}>
         <h1>WordPress API データ変換デバッグ</h1>
