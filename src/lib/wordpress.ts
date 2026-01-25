@@ -1,4 +1,4 @@
-import { DogRun } from "@/types";
+import { DogRun, ZoneType, GroundType } from "@/types";
 
 // WordPress REST APIのベースURL
 const WORDPRESS_API_URL = "https://wanplus-admin.com/wp-json/wp/v2";
@@ -52,10 +52,10 @@ function parseMannersWear(value?: string): boolean | "不明" {
   return "不明";
 }
 
-// 配列または文字列を文字列に変換（zone用）
+// 配列または文字列をZoneTypeに変換（zone用）
 // 配列の場合は、複数の値が含まれている可能性があるため、
 // フィルター処理で使用しやすいように最初の要素を返す
-function parseZone(value?: string | string[]): string {
+function parseZone(value?: string | string[]): ZoneType {
   if (!value) return "共用のみ";
   if (Array.isArray(value)) {
     // 配列の場合は最初の要素を使用
@@ -63,9 +63,21 @@ function parseZone(value?: string | string[]): string {
     if (value.includes("共用のみ")) {
       return "共用のみ";
     }
-    return value[0] || "共用のみ";
+    // 配列の最初の要素をZoneTypeとして返す
+    const firstValue = value[0] || "共用のみ";
+    // ZoneTypeに含まれているか確認
+    const validZones: ZoneType[] = ["共用のみ", "小型犬専用あり", "大型犬専用あり", "共用あり"];
+    if (validZones.includes(firstValue as ZoneType)) {
+      return firstValue as ZoneType;
+    }
+    return "共用のみ";
   }
-  return value;
+  // 文字列の場合もZoneTypeとして返す
+  const validZones: ZoneType[] = ["共用のみ", "小型犬専用あり", "大型犬専用あり", "共用あり"];
+  if (validZones.includes(value as ZoneType)) {
+    return value as ZoneType;
+  }
+  return "共用のみ";
 }
 
 // 文字列をbooleanに変換（parking用）
@@ -110,7 +122,7 @@ export function transformWordPressResponse(item: WordPressDogRunResponse): DogRu
       },
       parking: parseParking(acf.parking),
       zone: parseZone(acf.zone),
-      ground: (acf.ground as any) || "芝",
+      ground: (acf.ground as GroundType) || "芝",
       facilities: {
         water: parseFacilityValue(acf.facility_water),
         footWash: parseFacilityValue(acf.facility_foot_wash),
@@ -211,20 +223,12 @@ export async function fetchDogRuns(): Promise<DogRun[]> {
     if (transformed.length === 0 && data.length > 0) {
       const errorMsg = `All WordPress items failed to transform. Errors: ${JSON.stringify(transformationErrors, null, 2)}`;
       console.error("[WordPress API] ERROR:", errorMsg);
-      // デバッグ用: エラーをthrowして詳細を確認
-      // 本番環境では空配列を返す方が良い場合もあるが、デバッグのためエラーをthrow
+      // エラーをthrowして、デバッグページで表示されるようにする
       throw new Error(errorMsg);
     }
     
     if (transformationErrors.length > 0) {
       console.error(`[WordPress API] WARNING: ${transformationErrors.length} items failed to transform:`, JSON.stringify(transformationErrors, null, 2));
-    }
-    
-    if (transformed.length === 0) {
-      const errorMsg = "No dog runs data available from WordPress API";
-      console.error("[WordPress API] ERROR:", errorMsg);
-      // データが空の場合もエラーとして扱う（デバッグ用）
-      throw new Error(errorMsg);
     }
     
     return transformed;
@@ -236,7 +240,7 @@ export async function fetchDogRuns(): Promise<DogRun[]> {
     if (error instanceof Error) {
       console.error("[WordPress API] Error stack:", error.stack);
     }
-    // デバッグ用: エラーを再throwして、デバッグページで表示されるようにする
+    // エラーを再throwして、デバッグページで表示されるようにする
     throw error;
   }
 }
