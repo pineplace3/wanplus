@@ -24,8 +24,8 @@ interface WordPressDogRunResponse {
     x_account?: string;
     instagram_account?: string;
     fee?: string;
-    parking?: boolean;
-    zone?: string;
+    parking?: boolean | string; // booleanまたは文字列（"あり"など）
+    zone?: string | string[]; // 文字列または配列
     ground?: string;
     facility_water?: string;
     facility_foot_wash?: string;
@@ -52,6 +52,25 @@ function parseMannersWear(value?: string): boolean | "不明" {
   return "不明";
 }
 
+// 配列または文字列を文字列に変換（zone用）
+function parseZone(value?: string | string[]): string {
+  if (!value) return "共用のみ";
+  if (Array.isArray(value)) {
+    // 配列の場合は最初の要素を使用、または複数の場合は結合
+    return value[0] || "共用のみ";
+  }
+  return value;
+}
+
+// 文字列をbooleanに変換（parking用）
+function parseParking(value?: string | boolean): boolean {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") {
+    return value === "あり" || value === "true" || value === "1";
+  }
+  return false;
+}
+
 // WordPressレスポンスをDogRun型に変換
 function transformWordPressResponse(item: WordPressDogRunResponse): DogRun {
   try {
@@ -62,8 +81,11 @@ function transformWordPressResponse(item: WordPressDogRunResponse): DogRun {
       console.warn("Item missing both slug and id:", item);
     }
     
+    // slugをデコード（URLエンコードされている場合）
+    const decodedSlug = item.slug ? decodeURIComponent(item.slug) : null;
+    
     const result: DogRun = {
-      id: item.slug || `dr-${item.id}`,
+      id: decodedSlug || `dr-${item.id}`,
       name: acf.name || item.title.rendered || "名称未設定",
       description: acf.description || "",
       image: acf.image || "",
@@ -80,8 +102,8 @@ function transformWordPressResponse(item: WordPressDogRunResponse): DogRun {
         xAccount: acf.x_account,
         instagramAccount: acf.instagram_account,
       },
-      parking: acf.parking || false,
-      zone: (acf.zone as any) || "共用のみ",
+      parking: parseParking(acf.parking),
+      zone: parseZone(acf.zone),
       ground: (acf.ground as any) || "芝",
       facilities: {
         water: parseFacilityValue(acf.facility_water),
