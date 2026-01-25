@@ -1,55 +1,42 @@
-// 実際のAPIレスポンスで変換処理を直接テスト
-"use client";
-
-import { useState, useEffect } from "react";
+// 実際のAPIレスポンスで変換処理を直接テスト（サーバーコンポーネント）
 import { transformWordPressResponse } from "@/lib/wordpress";
 
-export default function TestTransformPage() {
-  const [result, setResult] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+export default async function TestTransformPage() {
+  let result: any = null;
+  let error: string | null = null;
 
-  useEffect(() => {
-    async function test() {
-      try {
-        // 実際のAPIレスポンスを取得
-        const response = await fetch("https://wanplus-admin.com/wp-json/wp/v2/dog_run?per_page=1", {
-          headers: {
-            'Accept': 'application/json',
-          },
-        });
-        
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.length === 0) {
-          throw new Error("No data returned from API");
-        }
-        
-        // 変換処理をテスト
-        try {
-          // @ts-ignore
-          const transformed = transformWordPressResponse(data[0]);
-          setResult({ success: true, data: transformed, raw: data[0] });
-        } catch (transformError) {
-          setError(`Transform error: ${transformError instanceof Error ? transformError.message : String(transformError)}`);
-          setResult({ success: false, raw: data[0] });
-        }
-      } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
-      } finally {
-        setLoading(false);
-      }
+  try {
+    // 実際のAPIレスポンスを取得
+    const response = await fetch("https://wanplus-admin.com/wp-json/wp/v2/dog_run?per_page=1", {
+      next: { revalidate: 0 },
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (compatible; WanPlus/1.0; +https://wanplus.vercel.app)',
+        'Referer': 'https://wanplus.vercel.app',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
     }
     
-    test();
-  }, []);
-
-  if (loading) {
-    return <div style={{ padding: "20px" }}>読み込み中...</div>;
+    const data = await response.json();
+    
+    if (data.length === 0) {
+      throw new Error("No data returned from API");
+    }
+    
+    // 変換処理をテスト
+    try {
+      // @ts-ignore
+      const transformed = transformWordPressResponse(data[0]);
+      result = { success: true, data: transformed, raw: data[0] };
+    } catch (transformError) {
+      error = `Transform error: ${transformError instanceof Error ? transformError.message : String(transformError)}`;
+      result = { success: false, raw: data[0], transformError: transformError instanceof Error ? transformError.message : String(transformError) };
+    }
+  } catch (e) {
+    error = e instanceof Error ? e.message : String(e);
   }
 
   return (
@@ -84,6 +71,11 @@ export default function TestTransformPage() {
           ) : (
             <div style={{ marginBottom: "20px", background: "#ffebee", padding: "15px", borderRadius: "5px" }}>
               <h2 style={{ color: "red" }}>変換失敗</h2>
+              {result.transformError && (
+                <pre style={{ background: "#fff", padding: "10px", overflow: "auto", color: "red" }}>
+                  {result.transformError}
+                </pre>
+              )}
             </div>
           )}
         </>
