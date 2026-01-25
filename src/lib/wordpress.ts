@@ -54,39 +54,52 @@ function parseMannersWear(value?: string): boolean | "不明" {
 
 // WordPressレスポンスをDogRun型に変換
 function transformWordPressResponse(item: WordPressDogRunResponse): DogRun {
-  const acf = item.acf || {};
-  
-  return {
-    id: item.slug || `dr-${item.id}`,
-    name: acf.name || item.title.rendered,
-    description: acf.description || "",
-    image: acf.image || "",
-    address: {
-      prefecture: acf.prefecture || "",
-      city: acf.city || "",
-      line1: acf.line1,
-    },
-    hours: acf.hours,
-    holidays: acf.holidays,
-    contact: {
-      phone: acf.phone,
-      website: acf.website,
-      xAccount: acf.x_account,
-      instagramAccount: acf.instagram_account,
-    },
-    parking: acf.parking || false,
-    zone: (acf.zone as any) || "共用のみ",
-    ground: (acf.ground as any) || "芝",
-    facilities: {
-      water: parseFacilityValue(acf.facility_water),
-      footWash: parseFacilityValue(acf.facility_foot_wash),
-      agility: parseFacilityValue(acf.facility_agility),
-      lights: parseFacilityValue(acf.facility_lights),
-    },
-    conditions: acf.conditions,
-    mannersWear: parseMannersWear(acf.manners_wear),
-    fee: acf.fee,
-  };
+  try {
+    const acf = item.acf || {};
+    
+    // デバッグ: 必須フィールドの確認
+    if (!item.slug && !item.id) {
+      console.warn("Item missing both slug and id:", item);
+    }
+    
+    const result: DogRun = {
+      id: item.slug || `dr-${item.id}`,
+      name: acf.name || item.title.rendered || "名称未設定",
+      description: acf.description || "",
+      image: acf.image || "",
+      address: {
+        prefecture: acf.prefecture || "",
+        city: acf.city || "",
+        line1: acf.line1,
+      },
+      hours: acf.hours,
+      holidays: acf.holidays,
+      contact: {
+        phone: acf.phone,
+        website: acf.website,
+        xAccount: acf.x_account,
+        instagramAccount: acf.instagram_account,
+      },
+      parking: acf.parking || false,
+      zone: (acf.zone as any) || "共用のみ",
+      ground: (acf.ground as any) || "芝",
+      facilities: {
+        water: parseFacilityValue(acf.facility_water),
+        footWash: parseFacilityValue(acf.facility_foot_wash),
+        agility: parseFacilityValue(acf.facility_agility),
+        lights: parseFacilityValue(acf.facility_lights),
+      },
+      conditions: acf.conditions,
+      mannersWear: parseMannersWear(acf.manners_wear),
+      fee: acf.fee,
+    };
+    
+    return result;
+  } catch (error) {
+    console.error("Error in transformWordPressResponse:", error);
+    console.error("Item data:", JSON.stringify(item, null, 2));
+    throw error;
+  }
 }
 
 // WordPress REST APIからドッグランデータを取得
@@ -115,9 +128,40 @@ export async function fetchDogRuns(): Promise<DogRun[]> {
     
     if (data.length === 0) {
       console.warn("No dog runs found in WordPress API");
+      return [];
     }
     
-    return data.map(transformWordPressResponse);
+    // デバッグ: 最初のアイテムの構造をログに出力
+    if (data.length > 0) {
+      console.log("First item structure:", JSON.stringify(data[0], null, 2));
+      console.log("ACF fields:", data[0].acf ? "Present" : "Missing");
+      if (data[0].acf) {
+        console.log("ACF keys:", Object.keys(data[0].acf));
+      }
+    }
+    
+    // データ変換処理（エラーが発生しても続行）
+    const transformed: DogRun[] = [];
+    for (let i = 0; i < data.length; i++) {
+      try {
+        const transformedItem = transformWordPressResponse(data[i]);
+        transformed.push(transformedItem);
+      } catch (error) {
+        console.error(`Error transforming item ${i} (ID: ${data[i].id}, Slug: ${data[i].slug}):`, error);
+        if (error instanceof Error) {
+          console.error("Transformation error details:", error.message);
+        }
+        // エラーが発生したアイテムはスキップして続行
+      }
+    }
+    
+    console.log(`Successfully transformed ${transformed.length} out of ${data.length} items`);
+    
+    if (transformed.length === 0 && data.length > 0) {
+      console.error("All items failed to transform. Check the transformation logic.");
+    }
+    
+    return transformed;
   } catch (error) {
     console.error("Error fetching dog runs from WordPress:", error);
     // エラー詳細をログに出力
