@@ -124,27 +124,40 @@ export default async function DebugTransformPage() {
           </div>
         )}
         
-        {rawData && Array.isArray(rawData) && rawData.length > 0 && (
-          <div style={{ marginBottom: "20px", border: "2px solid #4A5844", padding: "15px", borderRadius: "5px" }}>
-            <h2>直接変換テスト（生のAPIレスポンスを使用）:</h2>
-            <p style={{ fontSize: "18px", fontWeight: "bold" }}>
-              成功: {directTransformResults.length}件 / エラー: {directTransformErrors.length}件 / 合計: {rawData.length}件
+        {rawData && Array.isArray(rawData) && rawData.length > 0 ? (
+          <div style={{ marginBottom: "20px", border: "2px solid #4A5844", padding: "15px", borderRadius: "5px", background: "#f9f9f9" }}>
+            <h2 style={{ color: "#4A5844", marginBottom: "10px" }}>直接変換テスト（生のAPIレスポンスを使用）:</h2>
+            <p style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "10px" }}>
+              成功: <span style={{ color: "green" }}>{directTransformResults.length}</span>件 / 
+              エラー: <span style={{ color: "red" }}>{directTransformErrors.length}</span>件 / 
+              合計: {rawData.length}件
             </p>
             {directTransformErrors.length > 0 && (
-              <div style={{ marginTop: "15px", background: "#ffebee", padding: "10px" }}>
-                <h3 style={{ color: "red" }}>変換エラー詳細:</h3>
-                <pre style={{ background: "#fff", padding: "10px", overflow: "auto", color: "red", maxHeight: "300px" }}>
+              <div style={{ marginTop: "15px", background: "#ffebee", padding: "10px", borderRadius: "5px" }}>
+                <h3 style={{ color: "red", marginBottom: "10px" }}>変換エラー詳細:</h3>
+                <pre style={{ background: "#fff", padding: "10px", overflow: "auto", color: "red", maxHeight: "300px", fontSize: "12px" }}>
                   {JSON.stringify(directTransformErrors, null, 2)}
                 </pre>
               </div>
             )}
             {directTransformResults.length > 0 && (
               <div style={{ marginTop: "15px" }}>
-                <h3>最初のアイテム（直接変換結果）:</h3>
-                <pre style={{ background: "#e8f5e9", padding: "10px", overflow: "auto", maxHeight: "400px" }}>
+                <h3 style={{ color: "green", marginBottom: "10px" }}>最初のアイテム（直接変換結果）:</h3>
+                <pre style={{ background: "#e8f5e9", padding: "10px", overflow: "auto", maxHeight: "400px", fontSize: "12px" }}>
                   {JSON.stringify(directTransformResults[0], null, 2)}
                 </pre>
               </div>
+            )}
+            {directTransformResults.length === 0 && directTransformErrors.length === 0 && (
+              <p style={{ color: "orange", marginTop: "10px" }}>変換処理が実行されていません</p>
+            )}
+          </div>
+        ) : (
+          <div style={{ marginBottom: "20px", border: "2px solid #ff9800", padding: "15px", borderRadius: "5px", background: "#fff3e0" }}>
+            <h2 style={{ color: "#ff9800" }}>直接変換テスト:</h2>
+            <p style={{ color: "#ff9800" }}>生のAPIレスポンスが取得できていないため、直接変換テストを実行できませんでした。</p>
+            {rawError && (
+              <p style={{ color: "red", marginTop: "10px" }}>エラー: {rawError}</p>
             )}
           </div>
         )}
