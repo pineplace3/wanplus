@@ -78,7 +78,7 @@ function parseParking(value?: string | boolean): boolean {
 }
 
 // WordPressレスポンスをDogRun型に変換
-function transformWordPressResponse(item: WordPressDogRunResponse): DogRun {
+export function transformWordPressResponse(item: WordPressDogRunResponse): DogRun {
   try {
     const acf = item.acf || {};
     

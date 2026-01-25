@@ -1,10 +1,35 @@
 // デバッグ用: データ変換処理の確認
-import { fetchDogRuns } from "@/lib/wordpress";
+import { fetchDogRuns, transformWordPressResponse } from "@/lib/wordpress";
 
 export default async function DebugTransformPage() {
   let dogRuns: any[] = [];
   let fetchError: string | null = null;
   
+  // 生のAPIレスポンスも取得して比較
+  const apiUrl = "https://wanplus-admin.com/wp-json/wp/v2/dog_run?per_page=100";
+  let rawData = null;
+  let rawError = null;
+  
+  try {
+    const rawResponse = await fetch(apiUrl, {
+      next: { revalidate: 0 },
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (compatible; WanPlus/1.0; +https://wanplus.vercel.app)',
+        'Referer': 'https://wanplus.vercel.app',
+      },
+    });
+    
+    if (rawResponse.ok) {
+      rawData = await rawResponse.json();
+    } else {
+      rawError = `Status: ${rawResponse.status} ${rawResponse.statusText}`;
+    }
+  } catch (e) {
+    rawError = e instanceof Error ? e.message : String(e);
+  }
+  
+  // fetchDogRunsを呼び出し
   try {
     console.error("[DebugTransform] Starting fetchDogRuns...");
     dogRuns = await fetchDogRuns();
@@ -13,30 +38,23 @@ export default async function DebugTransformPage() {
     fetchError = error instanceof Error ? error.message : String(error);
     console.error("[DebugTransform] Error fetching:", fetchError);
   }
-    
-    // 生のAPIレスポンスも取得して比較
-    const apiUrl = "https://wanplus-admin.com/wp-json/wp/v2/dog_run?per_page=100";
-    let rawData = null;
-    let rawError = null;
-    
-    try {
-      const rawResponse = await fetch(apiUrl, {
-        next: { revalidate: 0 },
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (compatible; WanPlus/1.0; +https://wanplus.vercel.app)',
-          'Referer': 'https://wanplus.vercel.app',
-        },
-      });
-      
-      if (rawResponse.ok) {
-        rawData = await rawResponse.json();
-      } else {
-        rawError = `Status: ${rawResponse.status} ${rawResponse.statusText}`;
+  
+  // 生のAPIレスポンスで直接変換処理をテスト
+  let directTransformResults: any[] = [];
+  let directTransformErrors: Array<{ index: number; error: string }> = [];
+  
+  if (rawData && Array.isArray(rawData) && rawData.length > 0) {
+    for (let i = 0; i < rawData.length; i++) {
+      try {
+        // @ts-ignore - テスト用なので型チェックを無視
+        const transformed = transformWordPressResponse(rawData[i]);
+        directTransformResults.push(transformed);
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        directTransformErrors.push({ index: i, error: errorMsg });
       }
-    } catch (e) {
-      rawError = e instanceof Error ? e.message : String(e);
     }
+  }
     
     return (
       <div style={{ padding: "20px", fontFamily: "monospace" }}>
@@ -101,6 +119,31 @@ export default async function DebugTransformPage() {
               <div style={{ marginTop: "15px" }}>
                 <p style={{ color: "red" }}>生のAPIレスポンスには {rawData.length} 件のデータがありますが、変換処理でエラーが発生している可能性があります。</p>
                 <p style={{ color: "red" }}>Vercelのログで「[WordPress API] Error transforming item」というメッセージを確認してください。</p>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {rawData && Array.isArray(rawData) && rawData.length > 0 && (
+          <div style={{ marginBottom: "20px", border: "2px solid #4A5844", padding: "15px", borderRadius: "5px" }}>
+            <h2>直接変換テスト（生のAPIレスポンスを使用）:</h2>
+            <p style={{ fontSize: "18px", fontWeight: "bold" }}>
+              成功: {directTransformResults.length}件 / エラー: {directTransformErrors.length}件 / 合計: {rawData.length}件
+            </p>
+            {directTransformErrors.length > 0 && (
+              <div style={{ marginTop: "15px", background: "#ffebee", padding: "10px" }}>
+                <h3 style={{ color: "red" }}>変換エラー詳細:</h3>
+                <pre style={{ background: "#fff", padding: "10px", overflow: "auto", color: "red", maxHeight: "300px" }}>
+                  {JSON.stringify(directTransformErrors, null, 2)}
+                </pre>
+              </div>
+            )}
+            {directTransformResults.length > 0 && (
+              <div style={{ marginTop: "15px" }}>
+                <h3>最初のアイテム（直接変換結果）:</h3>
+                <pre style={{ background: "#e8f5e9", padding: "10px", overflow: "auto", maxHeight: "400px" }}>
+                  {JSON.stringify(directTransformResults[0], null, 2)}
+                </pre>
               </div>
             )}
           </div>
