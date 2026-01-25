@@ -187,15 +187,21 @@ export async function fetchDogRuns(): Promise<DogRun[]> {
     
     // データ変換処理（エラーが発生しても続行）
     const transformed: DogRun[] = [];
+    const transformationErrors: Array<{ index: number; id: number; slug: string; error: string }> = [];
+    
     for (let i = 0; i < data.length; i++) {
       try {
         const transformedItem = transformWordPressResponse(data[i]);
         transformed.push(transformedItem);
       } catch (error) {
-        console.error(`[WordPress API] Error transforming item ${i} (ID: ${data[i].id}, Slug: ${data[i].slug}):`, error);
-        if (error instanceof Error) {
-          console.error("[WordPress API] Transformation error:", error.message);
-        }
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.error(`[WordPress API] Error transforming item ${i} (ID: ${data[i].id}, Slug: ${data[i].slug}):`, errorMsg);
+        transformationErrors.push({
+          index: i,
+          id: data[i].id,
+          slug: data[i].slug || "unknown",
+          error: errorMsg,
+        });
         // エラーが発生したアイテムはスキップして続行
       }
     }
@@ -203,10 +209,14 @@ export async function fetchDogRuns(): Promise<DogRun[]> {
     console.error(`[WordPress API] Successfully transformed ${transformed.length} out of ${data.length} items`);
     
     if (transformed.length === 0 && data.length > 0) {
-      const errorMsg = "All WordPress items failed to transform. Check transformation logic.";
+      const errorMsg = `All WordPress items failed to transform. Errors: ${JSON.stringify(transformationErrors)}`;
       console.error("[WordPress API] ERROR:", errorMsg);
       // エラーをthrowしてVercelのログに表示されるようにする
       throw new Error(errorMsg);
+    }
+    
+    if (transformationErrors.length > 0) {
+      console.error(`[WordPress API] WARNING: ${transformationErrors.length} items failed to transform:`, transformationErrors);
     }
     
     if (transformed.length === 0) {

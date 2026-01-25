@@ -2,10 +2,17 @@
 import { fetchDogRuns } from "@/lib/wordpress";
 
 export default async function DebugTransformPage() {
+  let dogRuns: any[] = [];
+  let fetchError: string | null = null;
+  
   try {
     console.error("[DebugTransform] Starting fetchDogRuns...");
-    const dogRuns = await fetchDogRuns();
+    dogRuns = await fetchDogRuns();
     console.error(`[DebugTransform] Received ${dogRuns.length} dog runs`);
+  } catch (error) {
+    fetchError = error instanceof Error ? error.message : String(error);
+    console.error("[DebugTransform] Error fetching:", fetchError);
+  }
     
     // 生のAPIレスポンスも取得して比較
     const apiUrl = "https://wanplus-admin.com/wp-json/wp/v2/dog_run?per_page=100";
