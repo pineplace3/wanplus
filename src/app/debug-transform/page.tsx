@@ -89,6 +89,14 @@ export default async function DebugTransformPage() {
           <div style={{ marginBottom: "20px", background: "#ffebee", padding: "15px", borderRadius: "5px" }}>
             <h2 style={{ color: "red" }}>警告:</h2>
             <p style={{ color: "red", fontWeight: "bold" }}>データが取得できませんでした</p>
+            {fetchError && (
+              <div style={{ marginTop: "15px" }}>
+                <h3 style={{ color: "red" }}>エラー詳細:</h3>
+                <pre style={{ background: "#fff", padding: "10px", overflow: "auto", color: "red" }}>
+                  {fetchError}
+                </pre>
+              </div>
+            )}
             {rawData && Array.isArray(rawData) && rawData.length > 0 && (
               <div style={{ marginTop: "15px" }}>
                 <p style={{ color: "red" }}>生のAPIレスポンスには {rawData.length} 件のデータがありますが、変換処理でエラーが発生している可能性があります。</p>
