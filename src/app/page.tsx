@@ -1,65 +1,135 @@
-import Image from "next/image";
+import Link from "next/link";
+import { InfoCard } from "@/components/InfoCard";
+import { SectionHeader } from "@/components/SectionHeader";
+import { NewArrivalsSection } from "@/components/NewArrivalsSection";
+import { HeroSection } from "@/components/HeroSection";
+import { CategoryNav } from "@/components/CategoryNav";
+import { getDogRuns } from "@/data/dogRuns";
+import { cafes } from "@/data/cafes";
+import { stays } from "@/data/stays";
 
-export default function Home() {
+const sections = [
+  {
+    title: "ドッグランを探す",
+    href: "/dog-runs",
+    description: "地面の素材やエリア分け情報で絞り込み。駐車場有無もチェック。",
+    image:
+      "https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?auto=format&fit=crop&w=1200&q=80",
+    meta: "芝 / 砂 / 土・小型専用あり",
+  },
+  {
+    title: "犬と行けるカフェ",
+    href: "/cafes",
+    description: "店内OKかテラスのみか、犬用メニューの有無で探せます。",
+    image:
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80",
+    meta: "店内OK・テラスのみ・犬用メニュー",
+  },
+  {
+    title: "動物病院を探す",
+    href: "/clinics",
+    description: "夜間対応や専門医、医療機器の情報を一覧で確認。",
+    image:
+      "https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&w=1200&q=80",
+    meta: "夜間対応 / 専門医 / 画像診断",
+  },
+  {
+    title: "犬と泊まれる宿・ホテル",
+    href: "/stays",
+    description: "宿泊可能サイズやドッグラン有無、同伴可能範囲で比較。",
+    image:
+      "https://images.unsplash.com/photo-1512914890250-353c97c9e7c3?auto=format&fit=crop&w=1200&q=80",
+    meta: "大型犬OK・ドッグラン併設",
+  },
+];
+
+export default async function Home() {
+  // WordPress APIからドッグランデータを取得
+  const dogRuns = await getDogRuns();
+  
+  // 新着3件を取得（現在は配列の最初の3件を新着として扱う）
+  const newDogRuns = dogRuns.slice(0, 3).map((item) => ({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    image: item.image,
+    badges: [
+      { label: item.zone, tone: "primary" as const },
+      { label: item.ground, tone: "warning" as const },
+      ...(item.parking ? [{ label: "駐車場あり", tone: "success" as const }] : []),
+    ],
+    address: item.address,
+  }));
+
+  const newCafes = cafes.slice(0, 3).map((item) => ({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    image: item.image,
+    badges: [
+      { label: item.companionArea, tone: "primary" as const },
+      { label: item.sizeLimit, tone: "warning" as const },
+      ...(item.dogMenu === "有り" ? [{ label: "犬用メニュー", tone: "success" as const }] : []),
+    ],
+    address: item.address,
+  }));
+
+  const newStays = stays.slice(0, 3).map((item) => ({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    image: item.image,
+    badges: [
+      { label: item.allowedSize, tone: "warning" as const },
+      ...(item.hasDogRun
+        ? [{ label: "ドッグランあり", tone: "success" as const }]
+        : [{ label: "ドッグランなし", tone: "muted" as const }]),
+      { label: item.companionRange, tone: "primary" as const },
+    ],
+    address: item.address,
+  }));
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <>
+      <HeroSection />
+      <CategoryNav />
+      <main className="mx-auto flex min-h-screen max-w-7xl flex-col gap-12 px-6 py-12">
+        <section className="section space-y-8 p-6 sm:p-8">
+          <SectionHeader
+            title="新着情報"
+            subtitle="最新のドッグラン、カフェ、宿泊施設をご紹介"
+          />
+          <div className="space-y-10">
+            <NewArrivalsSection
+              title="新着ドッグラン"
+              href="/dog-runs"
+              items={newDogRuns}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+            <NewArrivalsSection
+              title="新着カフェ"
+              href="/cafes"
+              items={newCafes}
+            />
+            <NewArrivalsSection
+              title="新着宿泊施設"
+              href="/stays"
+              items={newStays}
+            />
+          </div>
+        </section>
+
+        <section className="space-y-6">
+          <SectionHeader
+            title="カテゴリーから探す"
+            subtitle="一覧→詳細ページで設備・条件を確認できます"
+          />
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {sections.map((section) => (
+              <InfoCard key={section.href} {...section} />
+            ))}
+          </div>
+        </section>
       </main>
-    </div>
+    </>
   );
 }
