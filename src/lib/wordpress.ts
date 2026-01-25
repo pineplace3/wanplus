@@ -104,10 +104,12 @@ function transformWordPressResponse(item: WordPressDogRunResponse): DogRun {
 
 // WordPress REST APIからドッグランデータを取得
 export async function fetchDogRuns(): Promise<DogRun[]> {
+  const apiUrl = `${WORDPRESS_API_URL}/dog_run?per_page=100`;
+  
+  // エラーを明示的にログに出力（Vercelのログに表示されるように）
+  console.error("[WordPress API] Starting fetch:", apiUrl);
+  
   try {
-    const apiUrl = `${WORDPRESS_API_URL}/dog_run?per_page=100`;
-    console.log("Fetching from WordPress API:", apiUrl);
-    
     const response = await fetch(apiUrl, {
       next: { revalidate: 3600 }, // 1時間キャッシュ
       headers: {
@@ -115,28 +117,29 @@ export async function fetchDogRuns(): Promise<DogRun[]> {
       },
     });
 
-    console.log("WordPress API response status:", response.status, response.statusText);
+    console.error("[WordPress API] Response status:", response.status, response.statusText);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("WordPress API error response:", errorText);
-      throw new Error(`WordPress API error: ${response.status} - ${errorText}`);
+      console.error("[WordPress API] Error response:", errorText);
+      const error = new Error(`WordPress API error: ${response.status} - ${errorText}`);
+      console.error("[WordPress API] Throwing error:", error.message);
+      throw error;
     }
 
     const data: WordPressDogRunResponse[] = await response.json();
-    console.log(`Fetched ${data.length} dog runs from WordPress`);
+    console.error(`[WordPress API] Fetched ${data.length} dog runs`);
     
     if (data.length === 0) {
-      console.warn("No dog runs found in WordPress API");
+      console.error("[WordPress API] WARNING: No dog runs found in API response");
       return [];
     }
     
     // デバッグ: 最初のアイテムの構造をログに出力
     if (data.length > 0) {
-      console.log("First item structure:", JSON.stringify(data[0], null, 2));
-      console.log("ACF fields:", data[0].acf ? "Present" : "Missing");
+      console.error("[WordPress API] First item has ACF:", data[0].acf ? "Yes" : "No");
       if (data[0].acf) {
-        console.log("ACF keys:", Object.keys(data[0].acf));
+        console.error("[WordPress API] ACF keys:", Object.keys(data[0].acf).join(", "));
       }
     }
     
@@ -147,29 +150,31 @@ export async function fetchDogRuns(): Promise<DogRun[]> {
         const transformedItem = transformWordPressResponse(data[i]);
         transformed.push(transformedItem);
       } catch (error) {
-        console.error(`Error transforming item ${i} (ID: ${data[i].id}, Slug: ${data[i].slug}):`, error);
+        console.error(`[WordPress API] Error transforming item ${i} (ID: ${data[i].id}, Slug: ${data[i].slug}):`, error);
         if (error instanceof Error) {
-          console.error("Transformation error details:", error.message);
+          console.error("[WordPress API] Transformation error:", error.message);
         }
         // エラーが発生したアイテムはスキップして続行
       }
     }
     
-    console.log(`Successfully transformed ${transformed.length} out of ${data.length} items`);
+    console.error(`[WordPress API] Successfully transformed ${transformed.length} out of ${data.length} items`);
     
     if (transformed.length === 0 && data.length > 0) {
-      console.error("All items failed to transform. Check the transformation logic.");
+      console.error("[WordPress API] ERROR: All items failed to transform!");
+      // エラーをthrowしてVercelのログに表示されるようにする
+      throw new Error("All WordPress items failed to transform. Check transformation logic.");
     }
     
     return transformed;
   } catch (error) {
-    console.error("Error fetching dog runs from WordPress:", error);
-    // エラー詳細をログに出力
+    // エラーを明示的にログに出力（Vercelのログに表示されるように）
+    console.error("[WordPress API] FATAL ERROR fetching dog runs:", error);
     if (error instanceof Error) {
-      console.error("Error message:", error.message);
-      console.error("Error stack:", error.stack);
+      console.error("[WordPress API] Error message:", error.message);
+      console.error("[WordPress API] Error stack:", error.stack);
     }
-    // エラー時は空配列を返す（またはフォールバックデータを返す）
+    // エラー時は空配列を返す
     return [];
   }
 }
