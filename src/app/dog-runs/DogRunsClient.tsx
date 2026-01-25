@@ -123,7 +123,12 @@ export default function DogRunsClient({ initialData }: DogRunsClientProps) {
               </div>
             </Link>
           ))}
-          {filtered.length === 0 ? (
+          {initialData.length === 0 ? (
+            <div className="section p-8 text-center text-gray-600">
+              <p className="text-lg font-semibold mb-2">データを取得できませんでした</p>
+              <p className="text-sm">WordPress APIからデータを取得できませんでした。設定を確認してください。</p>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="section p-8 text-center text-gray-600">
               条件に合うドッグランがありませんでした。条件を緩めて再検索してください。
             </div>

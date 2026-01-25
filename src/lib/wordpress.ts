@@ -92,18 +92,39 @@ function transformWordPressResponse(item: WordPressDogRunResponse): DogRun {
 // WordPress REST APIからドッグランデータを取得
 export async function fetchDogRuns(): Promise<DogRun[]> {
   try {
-    const response = await fetch(`${WORDPRESS_API_URL}/dog_run?per_page=100`, {
+    const apiUrl = `${WORDPRESS_API_URL}/dog_run?per_page=100`;
+    console.log("Fetching from WordPress API:", apiUrl);
+    
+    const response = await fetch(apiUrl, {
       next: { revalidate: 3600 }, // 1時間キャッシュ
+      headers: {
+        'Accept': 'application/json',
+      },
     });
 
+    console.log("WordPress API response status:", response.status, response.statusText);
+
     if (!response.ok) {
-      throw new Error(`WordPress API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error("WordPress API error response:", errorText);
+      throw new Error(`WordPress API error: ${response.status} - ${errorText}`);
     }
 
     const data: WordPressDogRunResponse[] = await response.json();
+    console.log(`Fetched ${data.length} dog runs from WordPress`);
+    
+    if (data.length === 0) {
+      console.warn("No dog runs found in WordPress API");
+    }
+    
     return data.map(transformWordPressResponse);
   } catch (error) {
     console.error("Error fetching dog runs from WordPress:", error);
+    // エラー詳細をログに出力
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
     // エラー時は空配列を返す（またはフォールバックデータを返す）
     return [];
   }
