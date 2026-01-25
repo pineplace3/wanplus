@@ -5,6 +5,11 @@ export default async function DebugPage() {
   try {
     const response = await fetch(apiUrl, {
       next: { revalidate: 0 }, // キャッシュしない
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (compatible; WanPlus/1.0; +https://wanplus.vercel.app)',
+        'Referer': 'https://wanplus.vercel.app',
+      },
     });
     
     const status = response.status;

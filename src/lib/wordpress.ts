@@ -136,6 +136,8 @@ export async function fetchDogRuns(): Promise<DogRun[]> {
       next: { revalidate: 3600 }, // 1時間キャッシュ
       headers: {
         'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (compatible; WanPlus/1.0; +https://wanplus.vercel.app)',
+        'Referer': 'https://wanplus.vercel.app',
       },
     });
 
