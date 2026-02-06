@@ -3,20 +3,21 @@ import Link from "next/link";
 
 export function HeroSection() {
   return (
-    <section className="relative w-full h-[500px] sm:h-[600px] overflow-hidden">
+    <section className="relative w-full h-[500px] sm:h-[600px] overflow-hidden bg-[#F5F5F3]">
       <Image
-        src="https://images.unsplash.com/photo-1551717743-49959800b1f6?auto=format&fit=crop&w=1920&q=80"
-        alt="元気な犬"
+        src="/hero-dogs.png"
+        alt="様々な犬種のイラスト"
         fill
-        className="object-cover"
+        className="object-contain object-bottom"
         priority
+        sizes="100vw"
       />
-      <div className="absolute inset-0 bg-black/20" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#F5F5F3] via-transparent to-transparent pointer-events-none" />
       <div className="relative z-10 h-full flex flex-col items-center justify-center px-6 text-center">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-[#2D2D2D] mb-4">
           愛犬との毎日に、プラスの喜びを。
         </h1>
-        <p className="text-lg sm:text-xl text-white/95 mb-8 max-w-2xl drop-shadow-md">
+        <p className="text-lg sm:text-xl text-[#2D2D2D]/90 mb-8 max-w-2xl">
           全国のドッグランや犬と行けるカフェ、宿情報をお届け。
         </p>
         <Link
