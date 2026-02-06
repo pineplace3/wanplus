@@ -21,34 +21,34 @@ export function NewArrivalsSection({ title, href, items }: NewArrivalsSectionPro
   if (items.length === 0) return null;
 
   return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-[#2D2D2D]">{title}</h2>
+    <section className="space-y-6">
+      <div className="flex items-center justify-between px-2">
+        <h2 className="text-2xl font-bold text-[#2D2D2D]">{title}</h2>
         <Link
           href={href}
-          className="text-sm font-semibold text-[#4A5844] transition hover:text-[#3a4636] hover:underline"
+          className="text-base font-semibold text-[#4A5844] transition hover:text-[#B56952] hover:underline"
         >
           もっと見る →
         </Link>
       </div>
-      <div className="overflow-x-auto pb-4 scrollbar-hide">
-        <div className="flex gap-4" style={{ width: "max-content" }}>
+      <div className="overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:-mx-6 sm:px-6">
+        <div className="flex gap-6" style={{ width: "max-content" }}>
           {items.map((item) => (
             <Link
               key={item.id}
               href={`${href}/${item.id}`}
-              className="group flex-shrink-0 overflow-hidden rounded-xl bg-white shadow-md transition hover:-translate-y-1 hover:shadow-xl w-72"
+              className="group flex-shrink-0 overflow-hidden rounded-2xl bg-white shadow-lg transition hover:-translate-y-2 hover:shadow-2xl w-80 sm:w-96"
             >
-              <div className="relative h-40 w-full">
+              <div className="relative h-56 sm:h-64 w-full">
                 <Image
                   src={item.image}
                   alt={item.name}
                   fill
-                  className="object-cover transition duration-500 group-hover:scale-105"
-                  sizes="(max-width: 768px) 288px, 288px"
+                  className="object-cover transition duration-500 group-hover:scale-110"
+                  sizes="(max-width: 640px) 320px, 384px"
                 />
                 {item.badges && item.badges.length > 0 ? (
-                  <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+                  <div className="absolute left-4 top-4 flex flex-wrap gap-2">
                     {item.badges.map((badge, idx) => (
                       <Badge key={idx} tone={badge.tone ?? "primary"}>
                         {badge.label}
@@ -57,11 +57,11 @@ export function NewArrivalsSection({ title, href, items }: NewArrivalsSectionPro
                   </div>
                 ) : null}
               </div>
-              <div className="flex flex-col gap-2 p-4">
-                <h3 className="text-base font-semibold text-[#2D2D2D] line-clamp-1">{item.name}</h3>
-                <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
+              <div className="flex flex-col gap-3 p-5 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-bold text-[#2D2D2D] line-clamp-1">{item.name}</h3>
+                <p className="text-sm sm:text-base text-gray-700 line-clamp-2 leading-relaxed">{item.description}</p>
                 {item.address ? (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm text-gray-600 font-medium">
                     {item.address.prefecture} {item.address.city}
                   </p>
                 ) : null}
