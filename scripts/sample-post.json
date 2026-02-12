@@ -1,0 +1,6 @@
+{
+  "title": "サンプル記事（Cursorから登録）",
+  "content": "<p>ここに本文を書きます。HTMLタグも使えます。</p><p>2段落目です。</p>",
+  "excerpt": "記事の抜粋（一覧表示用）",
+  "status": "publish"
+}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ページキャプチャツール</title>
+  <style>
+    body {
+      width: 300px;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+    }
+    h1 {
+      font-size: 18px;
+      margin: 0 0 15px 0;
+      color: #333;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    #status {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #666;
+      min-height: 40px;
+    }
+    .status-active {
+      background-color: #e3f2fd !important;
+      color: #1976d2 !important;
+    }
+  </style>
+</head>
+<body>
+  <h1>ページキャプチャツール</h1>
+  <div id="directionSelect" style="margin-bottom:12px;">
+    <label style="font-size:13px; color:#333; font-weight:bold; display:block; margin-bottom:6px;">ページ送り方向：</label>
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="dir-btn selected" data-dir="right" style="flex:1; padding:10px; font-size:13px; margin-bottom:0;">→ 右に進む</button>
+      <button type="button" class="dir-btn" data-dir="left" style="flex:1; padding:10px; font-size:13px; margin-bottom:0; background-color:#888;">← 左に進む</button>
+    </div>
+  </div>
+  <div id="waitTimeSelect" style="margin-bottom:12px;">
+    <label style="font-size:13px; color:#333; font-weight:bold; display:block; margin-bottom:6px;">待機時間（秒）：</label>
+    <div style="display:flex; gap:4px;">
+      <button type="button" class="wait-btn" data-wait="1" style="flex:1; padding:8px 0; font-size:13px; margin-bottom:0; background-color:#888;">1</button>
+      <button type="button" class="wait-btn" data-wait="2" style="flex:1; padding:8px 0; font-size:13px; margin-bottom:0; background-color:#888;">2</button>
+      <button type="button" class="wait-btn selected" data-wait="3" style="flex:1; padding:8px 0; font-size:13px; margin-bottom:0; background-color:#4CAF50;">3</button>
+      <button type="button" class="wait-btn" data-wait="4" style="flex:1; padding:8px 0; font-size:13px; margin-bottom:0; background-color:#888;">4</button>
+      <button type="button" class="wait-btn" data-wait="5" style="flex:1; padding:8px 0; font-size:13px; margin-bottom:0; background-color:#888;">5</button>
+      <button type="button" class="wait-btn" data-wait="6" style="flex:1; padding:8px 0; font-size:13px; margin-bottom:0; background-color:#888;">6</button>
+    </div>
+  </div>
+  <button id="startBtn">キャプチャ開始</button>
+  <button id="stopBtn" style="background-color:#f44336; display:none;">停止してPDF化</button>
+  <div id="status">準備完了</div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

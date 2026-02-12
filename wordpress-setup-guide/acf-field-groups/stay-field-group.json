@@ -1,0 +1,208 @@
+{
+  "key": "group_stay",
+  "title": "宿泊施設情報",
+  "fields": [
+    {
+      "key": "field_stay_name",
+      "label": "名前",
+      "name": "name",
+      "type": "text",
+      "required": 1
+    },
+    {
+      "key": "field_stay_description",
+      "label": "説明",
+      "name": "description",
+      "type": "textarea",
+      "required": 1
+    },
+    {
+      "key": "field_stay_image",
+      "label": "画像URL",
+      "name": "image",
+      "type": "image",
+      "return_format": "url",
+      "required": 1
+    },
+    {
+      "key": "field_stay_prefecture",
+      "label": "都道府県",
+      "name": "prefecture",
+      "type": "text",
+      "required": 1
+    },
+    {
+      "key": "field_stay_city",
+      "label": "市区町村",
+      "name": "city",
+      "type": "text",
+      "required": 1
+    },
+    {
+      "key": "field_stay_line1",
+      "label": "住所詳細",
+      "name": "line1",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_stay_hours",
+      "label": "営業時間/案内",
+      "name": "hours",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_stay_holidays",
+      "label": "営業日",
+      "name": "holidays",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_stay_phone",
+      "label": "電話番号",
+      "name": "phone",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_stay_website",
+      "label": "ウェブサイト",
+      "name": "website",
+      "type": "url",
+      "required": 0
+    },
+    {
+      "key": "field_stay_x_account",
+      "label": "Xアカウント",
+      "name": "x_account",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_stay_instagram_account",
+      "label": "Instagramアカウント",
+      "name": "instagram_account",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_stay_parking",
+      "label": "駐車場",
+      "name": "parking",
+      "type": "true_false",
+      "required": 1,
+      "default_value": 0
+    },
+    {
+      "key": "field_stay_allowed_size",
+      "label": "宿泊可能サイズ",
+      "name": "allowed_size",
+      "type": "select",
+      "required": 1,
+      "choices": {
+        "小型犬のみ": "小型犬のみ",
+        "大型犬OK": "大型犬OK"
+      },
+      "default_value": "大型犬OK"
+    },
+    {
+      "key": "field_stay_has_dog_run",
+      "label": "ドッグラン有無",
+      "name": "has_dog_run",
+      "type": "true_false",
+      "required": 1,
+      "default_value": 0
+    },
+    {
+      "key": "field_stay_dog_run_type",
+      "label": "ドッグランタイプ",
+      "name": "dog_run_type",
+      "type": "select",
+      "required": 0,
+      "choices": {
+        "共有ドッグラン": "共有ドッグラン",
+        "部屋併設ドッグラン": "部屋併設ドッグラン"
+      }
+    },
+    {
+      "key": "field_stay_companion_range",
+      "label": "同伴可能範囲",
+      "name": "companion_range",
+      "type": "select",
+      "required": 1,
+      "choices": {
+        "客室内のみ": "客室内のみ",
+        "レストラン同伴可": "レストラン同伴可",
+        "ロビー歩行可": "ロビー歩行可"
+      },
+      "default_value": "客室内のみ"
+    },
+    {
+      "key": "field_stay_amenities",
+      "label": "ペット専用アメニティ",
+      "name": "amenities",
+      "type": "repeater",
+      "required": 1,
+      "sub_fields": [
+        {
+          "key": "field_stay_amenities_item",
+          "label": "アメニティ名",
+          "name": "item",
+          "type": "text"
+        }
+      ],
+      "layout": "table"
+    },
+    {
+      "key": "field_stay_extra_fee_per_dog",
+      "label": "1頭あたり追加料金",
+      "name": "extra_fee_per_dog",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_stay_extra_fee_cleaning",
+      "label": "清掃代",
+      "name": "extra_fee_cleaning",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_stay_conditions",
+      "label": "宿泊条件",
+      "name": "conditions",
+      "type": "textarea",
+      "required": 0
+    },
+    {
+      "key": "field_stay_environment",
+      "label": "周辺環境",
+      "name": "environment",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_stay_nearby_clinic",
+      "label": "近隣の動物病院",
+      "name": "nearby_clinic",
+      "type": "text",
+      "required": 0
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "post_type",
+        "operator": "==",
+        "value": "stay"
+      }
+    ]
+  ],
+  "menu_order": 0,
+  "position": "normal",
+  "style": "default",
+  "label_placement": "top",
+  "instruction_placement": "label"
+}

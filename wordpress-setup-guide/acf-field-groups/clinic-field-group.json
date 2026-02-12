@@ -1,0 +1,171 @@
+{
+  "key": "group_clinic",
+  "title": "動物病院情報",
+  "fields": [
+    {
+      "key": "field_clinic_name",
+      "label": "名前",
+      "name": "name",
+      "type": "text",
+      "required": 1
+    },
+    {
+      "key": "field_clinic_description",
+      "label": "説明",
+      "name": "description",
+      "type": "textarea",
+      "required": 1
+    },
+    {
+      "key": "field_clinic_image",
+      "label": "画像URL",
+      "name": "image",
+      "type": "image",
+      "return_format": "url",
+      "required": 1
+    },
+    {
+      "key": "field_clinic_prefecture",
+      "label": "都道府県",
+      "name": "prefecture",
+      "type": "text",
+      "required": 1
+    },
+    {
+      "key": "field_clinic_city",
+      "label": "市区町村",
+      "name": "city",
+      "type": "text",
+      "required": 1
+    },
+    {
+      "key": "field_clinic_line1",
+      "label": "住所詳細",
+      "name": "line1",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_clinic_hours",
+      "label": "営業時間",
+      "name": "hours",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_clinic_holidays",
+      "label": "定休日",
+      "name": "holidays",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_clinic_phone",
+      "label": "電話番号",
+      "name": "phone",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_clinic_website",
+      "label": "ウェブサイト",
+      "name": "website",
+      "type": "url",
+      "required": 0
+    },
+    {
+      "key": "field_clinic_x_account",
+      "label": "Xアカウント",
+      "name": "x_account",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_clinic_instagram_account",
+      "label": "Instagramアカウント",
+      "name": "instagram_account",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_clinic_after_hours",
+      "label": "時間外対応",
+      "name": "after_hours",
+      "type": "select",
+      "required": 0,
+      "choices": {
+        "対応あり": "対応あり",
+        "対応なし": "対応なし"
+      }
+    },
+    {
+      "key": "field_clinic_pet_hotel",
+      "label": "ペットホテル",
+      "name": "pet_hotel",
+      "type": "true_false",
+      "required": 1,
+      "default_value": 0
+    },
+    {
+      "key": "field_clinic_trimming",
+      "label": "トリミング",
+      "name": "trimming",
+      "type": "true_false",
+      "required": 1,
+      "default_value": 0
+    },
+    {
+      "key": "field_clinic_specialists",
+      "label": "専門医/所属",
+      "name": "specialists",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_clinic_equipment",
+      "label": "医療機器",
+      "name": "equipment",
+      "type": "repeater",
+      "required": 0,
+      "sub_fields": [
+        {
+          "key": "field_clinic_equipment_item",
+          "label": "機器名",
+          "name": "item",
+          "type": "text"
+        }
+      ],
+      "layout": "table"
+    },
+    {
+      "key": "field_clinic_associations",
+      "label": "登録学会",
+      "name": "associations",
+      "type": "repeater",
+      "required": 0,
+      "sub_fields": [
+        {
+          "key": "field_clinic_associations_item",
+          "label": "学会名",
+          "name": "item",
+          "type": "text"
+        }
+      ],
+      "layout": "table"
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "post_type",
+        "operator": "==",
+        "value": "clinic"
+      }
+    ]
+  ],
+  "menu_order": 0,
+  "position": "normal",
+  "style": "default",
+  "label_placement": "top",
+  "instruction_placement": "label"
+}

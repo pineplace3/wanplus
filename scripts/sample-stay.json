@@ -1,0 +1,35 @@
+{
+  "name": "サンプル宿泊施設",
+  "description": "Cursorから登録する用のサンプルです。説明文を編集してから実行してください。",
+  "image": "https://images.unsplash.com/photo-1501117716987-c8e1ecb210af?auto=format&fit=crop&w=1200&q=80",
+  "prefecture": "長野県",
+  "city": "軽井沢町",
+  "line1": "軽井沢 1234",
+  "hours": "チェックイン 15:00 / チェックアウト 11:00",
+  "holidays": "不定休",
+  "phone": "0267-00-2222",
+  "website": "https://example.com/sample-stay",
+  "x_account": "@sample_stay",
+  "instagram_account": "@sample_stay",
+  "parking": true,
+  "allowed_size": "大型犬OK",
+  "has_dog_run": true,
+  "dog_run_type": "共有ドッグラン",
+  "companion_range": "レストラン同伴可",
+  "amenities": [
+    {
+      "item": "トイレシーツ"
+    },
+    {
+      "item": "足拭きタオル"
+    },
+    {
+      "item": "食器"
+    }
+  ],
+  "extra_fee_per_dog": "1頭 3,000円/泊",
+  "extra_fee_cleaning": "大型犬は+1,000円",
+  "conditions": "ワクチン証明提出。館内はリード着用。",
+  "environment": "森と小川に囲まれた静かな立地",
+  "nearby_clinic": "軽井沢動物病院（車10分）"
+}

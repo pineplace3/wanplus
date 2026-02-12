@@ -142,105 +142,109 @@ export function transformWordPressResponse(item: WordPressDogRunResponse): DogRu
   }
 }
 
-// WordPress REST APIからドッグランデータを取得
+// WordPress REST APIからドッグランデータを取得（ページネーション対応）
 export async function fetchDogRuns(): Promise<DogRun[]> {
-  const apiUrl = `${WORDPRESS_API_URL}/dog_run?per_page=100`;
-  
-  // エラーを明示的にログに出力（Vercelのログに表示されるように）
-  console.error("[WordPress API] Starting fetch:", apiUrl);
-  
+  const allData: WordPressDogRunResponse[] = [];
+  let page = 1;
+  const perPage = 100;
+
+  console.error("[WordPress API] Starting fetch dog runs (paginated)");
+
   try {
-    const response = await fetch(apiUrl, {
-      next: { revalidate: 3600 }, // 1時間キャッシュ
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (compatible; WanPlus/1.0; +https://wanplus.vercel.app)',
-        'Referer': 'https://wanplus.vercel.app',
-      },
-    });
+    // ページネーションで全件取得
+    while (true) {
+      const apiUrl = `${WORDPRESS_API_URL}/dog_run?per_page=${perPage}&page=${page}&status=publish`;
+      console.error(`[WordPress API] Fetching page ${page}: ${apiUrl}`);
 
-    console.error("[WordPress API] Response status:", response.status, response.statusText);
-    
-    // Content-Typeを確認
-    const contentType = response.headers.get("content-type");
-    console.error("[WordPress API] Content-Type:", contentType);
+      const response = await fetch(apiUrl, {
+        next: { revalidate: 60 }, // 60秒キャッシュ（短めに設定して更新を早く反映）
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (compatible; WanPlus/1.0; +https://wanplus.vercel.app)',
+          'Referer': 'https://wanplus.vercel.app',
+        },
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("[WordPress API] Error response:", errorText.substring(0, 500));
-      const error = new Error(`WordPress API error: ${response.status} - ${errorText.substring(0, 200)}`);
-      console.error("[WordPress API] Throwing error:", error.message);
-      throw error;
+      console.error("[WordPress API] Response status:", response.status, response.statusText);
+
+      // 400エラー（ページ範囲外）の場合はループ終了
+      if (response.status === 400) {
+        console.error("[WordPress API] Page out of range, stopping pagination");
+        break;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("[WordPress API] Error response:", errorText.substring(0, 500));
+        throw new Error(`WordPress API error: ${response.status} - ${errorText.substring(0, 200)}`);
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const responseText = await response.text();
+        console.error("[WordPress API] Expected JSON but got:", contentType);
+        throw new Error(`WordPress API returned ${contentType || "unknown content type"} instead of JSON`);
+      }
+
+      const data: WordPressDogRunResponse[] = await response.json();
+      console.error(`[WordPress API] Page ${page}: ${data.length} items`);
+
+      if (data.length === 0) {
+        break; // これ以上データなし
+      }
+
+      allData.push(...data);
+
+      // 取得件数がperPage未満なら最後のページ
+      if (data.length < perPage) {
+        break;
+      }
+
+      page++;
     }
 
-    // Content-TypeがJSONでない場合のエラーハンドリング
-    if (!contentType || !contentType.includes("application/json")) {
-      const responseText = await response.text();
-      console.error("[WordPress API] Expected JSON but got:", contentType);
-      console.error("[WordPress API] Response preview:", responseText.substring(0, 500));
-      throw new Error(`WordPress API returned ${contentType || "unknown content type"} instead of JSON. Response preview: ${responseText.substring(0, 200)}`);
-    }
+    console.error(`[WordPress API] Total fetched: ${allData.length} dog runs`);
 
-    const data: WordPressDogRunResponse[] = await response.json();
-    console.error(`[WordPress API] Fetched ${data.length} dog runs`);
-    
-    if (data.length === 0) {
+    if (allData.length === 0) {
       console.error("[WordPress API] WARNING: No dog runs found in API response");
       return [];
     }
-    
+
     // デバッグ: 最初のアイテムの構造をログに出力
-    if (data.length > 0) {
-      console.error("[WordPress API] First item has ACF:", data[0].acf ? "Yes" : "No");
-      if (data[0].acf) {
-        console.error("[WordPress API] ACF keys:", Object.keys(data[0].acf).join(", "));
-      }
+    if (allData[0]?.acf) {
+      console.error("[WordPress API] First item ACF keys:", Object.keys(allData[0].acf).join(", "));
     }
-    
+
     // データ変換処理（エラーが発生しても続行）
     const transformed: DogRun[] = [];
     const transformationErrors: Array<{ index: number; id: number; slug: string; error: string }> = [];
-    
-    for (let i = 0; i < data.length; i++) {
+
+    for (let i = 0; i < allData.length; i++) {
       try {
-        const transformedItem = transformWordPressResponse(data[i]);
+        const transformedItem = transformWordPressResponse(allData[i]);
         transformed.push(transformedItem);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
-        console.error(`[WordPress API] Error transforming item ${i} (ID: ${data[i].id}, Slug: ${data[i].slug}):`, errorMsg);
+        console.error(`[WordPress API] Error transforming item ${i} (ID: ${allData[i].id}):`, errorMsg);
         transformationErrors.push({
           index: i,
-          id: data[i].id,
-          slug: data[i].slug || "unknown",
+          id: allData[i].id,
+          slug: allData[i].slug || "unknown",
           error: errorMsg,
         });
-        // エラーが発生したアイテムはスキップして続行
       }
     }
-    
-    console.error(`[WordPress API] Successfully transformed ${transformed.length} out of ${data.length} items`);
-    
-    if (transformed.length === 0 && data.length > 0) {
-      const errorMsg = `All WordPress items failed to transform. Errors: ${JSON.stringify(transformationErrors, null, 2)}`;
-      console.error("[WordPress API] ERROR:", errorMsg);
-      // エラーをthrowして、デバッグページで表示されるようにする
-      throw new Error(errorMsg);
-    }
-    
+
+    console.error(`[WordPress API] Successfully transformed ${transformed.length} out of ${allData.length} items`);
+
     if (transformationErrors.length > 0) {
-      console.error(`[WordPress API] WARNING: ${transformationErrors.length} items failed to transform:`, JSON.stringify(transformationErrors, null, 2));
+      console.error(`[WordPress API] WARNING: ${transformationErrors.length} items failed to transform`);
     }
-    
+
     return transformed;
   } catch (error) {
-    // エラーを明示的にログに出力（Vercelのログに表示されるように）
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("[WordPress API] FATAL ERROR fetching dog runs:", errorMessage);
-    console.error("[WordPress API] Error object:", error);
-    if (error instanceof Error) {
-      console.error("[WordPress API] Error stack:", error.stack);
-    }
-    // エラーを再throwして、デバッグページで表示されるようにする
     throw error;
   }
 }
@@ -252,7 +256,7 @@ export async function fetchDogRunById(id: string): Promise<DogRun | null> {
     const response = await fetch(
       `${WORDPRESS_API_URL}/dog_run?slug=${id}&per_page=1`,
       {
-        next: { revalidate: 3600 },
+        next: { revalidate: 60 }, // 60秒キャッシュ
       }
     );
 

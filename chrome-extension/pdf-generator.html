@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>PDF生成中...</title>
+  <script src="jspdf.umd.min.js"></script>
+</head>
+<body style="font-family: Arial; padding: 20px;">
+  <h1>PDF生成中...</h1>
+  <p id="status">画像データを読み込み中...</p>
+  <script>
+    const statusEl = document.getElementById('status');
+
+    function updateStatus(msg) {
+      console.log(msg);
+      if (statusEl) statusEl.textContent = msg;
+    }
+
+    // chrome.storage.local から画像データを読み取ってPDF生成
+    chrome.storage.local.get('pdfImages', (result) => {
+      const images = result.pdfImages;
+      if (!images || images.length === 0) {
+        updateStatus('エラー: 画像データが見つかりません');
+        return;
+      }
+      updateStatus('画像データ取得完了 (' + images.length + '枚)。PDF生成を開始します...');
+      startPDFGeneration(images);
+    });
+
+    function startPDFGeneration(images) {
+      try {
+        if (typeof window.jspdf === 'undefined') {
+          updateStatus('エラー: jsPDFが読み込まれていません');
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        let idx = 0;
+
+        function addNext() {
+          if (idx >= images.length) {
+            updateStatus('PDFを保存中...');
+            pdf.save('kindle-capture-' + Date.now() + '.pdf');
+            updateStatus('完了！このタブは自動的に閉じられます。');
+            setTimeout(() => window.close(), 2000);
+            return;
+          }
+          updateStatus('画像 ' + (idx + 1) + '/' + images.length + ' を処理中...');
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            const pw = pdf.internal.pageSize.getWidth();
+            const ph = pdf.internal.pageSize.getHeight();
+            const ratio = Math.min(pw / img.width, ph / img.height);
+            const w = img.width * ratio;
+            const h = img.height * ratio;
+            if (idx > 0) pdf.addPage();
+            pdf.addImage(img, 'PNG', (pw - w) / 2, (ph - h) / 2, w, h);
+            idx++;
+            setTimeout(addNext, 100);
+          };
+          img.onerror = () => {
+            console.error('画像読み込みエラー:', idx);
+            idx++;
+            setTimeout(addNext, 100);
+          };
+          img.src = images[idx];
+        }
+        addNext();
+      } catch (e) {
+        updateStatus('エラー: ' + e.message);
+      }
+    }
+  </script>
+</body>
+</html>

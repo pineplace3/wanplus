@@ -1,0 +1,15 @@
+{
+  "name": "テストカフェ",
+  "description": "接続テスト用のカフェ情報です。",
+  "prefecture": "東京都",
+  "city": "世田谷区",
+  "line1": "用賀 3-8-2",
+  "hours": "9:00 - 20:00",
+  "holidays": "月曜",
+  "phone": "03-5000-1234",
+  "website": "https://example.com/test-cafe",
+  "parking": false,
+  "companion_area": "店内OK",
+  "size_limit": "大型犬OK",
+  "dog_menu": "有り"
+}

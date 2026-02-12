@@ -1,0 +1,176 @@
+{
+  "key": "group_cafe",
+  "title": "カフェ情報",
+  "fields": [
+    {
+      "key": "field_cafe_name",
+      "label": "名前",
+      "name": "name",
+      "type": "text",
+      "required": 1
+    },
+    {
+      "key": "field_cafe_description",
+      "label": "説明",
+      "name": "description",
+      "type": "textarea",
+      "required": 1
+    },
+    {
+      "key": "field_cafe_image",
+      "label": "画像URL",
+      "name": "image",
+      "type": "image",
+      "return_format": "url",
+      "required": 1
+    },
+    {
+      "key": "field_cafe_prefecture",
+      "label": "都道府県",
+      "name": "prefecture",
+      "type": "text",
+      "required": 1
+    },
+    {
+      "key": "field_cafe_city",
+      "label": "市区町村",
+      "name": "city",
+      "type": "text",
+      "required": 1
+    },
+    {
+      "key": "field_cafe_line1",
+      "label": "住所詳細",
+      "name": "line1",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_cafe_hours",
+      "label": "営業時間",
+      "name": "hours",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_cafe_holidays",
+      "label": "定休日",
+      "name": "holidays",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_cafe_phone",
+      "label": "電話番号",
+      "name": "phone",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_cafe_website",
+      "label": "ウェブサイト",
+      "name": "website",
+      "type": "url",
+      "required": 0
+    },
+    {
+      "key": "field_cafe_x_account",
+      "label": "Xアカウント",
+      "name": "x_account",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_cafe_instagram_account",
+      "label": "Instagramアカウント",
+      "name": "instagram_account",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_cafe_parking",
+      "label": "駐車場",
+      "name": "parking",
+      "type": "true_false",
+      "required": 1,
+      "default_value": 0
+    },
+    {
+      "key": "field_cafe_companion_area",
+      "label": "同伴可能エリア",
+      "name": "companion_area",
+      "type": "select",
+      "required": 1,
+      "choices": {
+        "店内OK": "店内OK",
+        "テラスのみ": "テラスのみ"
+      },
+      "default_value": "店内OK"
+    },
+    {
+      "key": "field_cafe_size_limit",
+      "label": "サイズ制限",
+      "name": "size_limit",
+      "type": "select",
+      "required": 1,
+      "choices": {
+        "小型犬のみ": "小型犬のみ",
+        "大型犬OK": "大型犬OK"
+      },
+      "default_value": "大型犬OK"
+    },
+    {
+      "key": "field_cafe_dog_menu",
+      "label": "犬用メニュー",
+      "name": "dog_menu",
+      "type": "select",
+      "required": 1,
+      "choices": {
+        "有り": "有り",
+        "無し": "無し"
+      },
+      "default_value": "無し"
+    },
+    {
+      "key": "field_cafe_services",
+      "label": "サービス",
+      "name": "services",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_cafe_conditions",
+      "label": "利用条件",
+      "name": "conditions",
+      "type": "textarea",
+      "required": 0
+    },
+    {
+      "key": "field_cafe_manners_wear",
+      "label": "マナーウェア",
+      "name": "manners_wear",
+      "type": "select",
+      "required": 0,
+      "choices": {
+        "義務あり": "義務あり",
+        "義務なし": "義務なし",
+        "不明": "不明"
+      },
+      "default_value": "不明"
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "post_type",
+        "operator": "==",
+        "value": "cafe"
+      }
+    ]
+  ],
+  "menu_order": 0,
+  "position": "normal",
+  "style": "default",
+  "label_placement": "top",
+  "instruction_placement": "label"
+}
